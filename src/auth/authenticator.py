@@ -55,6 +55,16 @@ LGPD_BANNER_TEXT: Final[str] = (
 #: Caminho default da configuração (resolvido a partir da raiz do projeto).
 DEFAULT_CONFIG_PATH: Final[Path] = Path(__file__).resolve().parents[2] / "config.yaml"
 
+
+def _load_config_from_secrets() -> dict[str, Any]:
+    """Carrega configuração a partir de ``st.secrets`` (Streamlit Cloud)."""
+    auth_secrets = st.secrets["auth"]
+    return {
+        "credentials": dict(auth_secrets["credentials"]),
+        "cookie": dict(auth_secrets["cookie"]),
+    }
+
+
 # --- Chaves de session_state (centralizadas para facilitar manutenção) ------
 
 _KEY_ATTEMPTS: Final[str] = "login_attempts"
@@ -122,7 +132,12 @@ def build_authenticator(
         Instância pronta para chamar ``.login()`` em um app Streamlit.
     """
 
-    cfg = dict(config) if config is not None else load_config(config_path)
+    if config is not None:
+        cfg = dict(config)
+    elif "auth" in st.secrets:
+        cfg = _load_config_from_secrets()
+    else:
+        cfg = load_config(config_path)
     cookie_cfg = cfg.get("cookie", {})
 
     return stauth.Authenticate(

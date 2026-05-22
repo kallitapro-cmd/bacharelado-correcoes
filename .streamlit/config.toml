@@ -5,7 +5,8 @@ secondaryBackgroundColor = "#f0f2f6"
 textColor = "#262730"
 
 [server]
-maxUploadSize = 10
+maxUploadSize = 50
+maxMessageSize = 50
 enableCORS = false
 
 [browser]
