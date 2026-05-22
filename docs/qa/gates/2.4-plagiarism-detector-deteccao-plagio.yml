@@ -1,0 +1,8 @@
+schema: 1
+story: '2.4'
+gate: PASS
+status_reason: 'Todos os 10 ACs verificados; 12 testes unitários passam (0 FAILED, 0 mocks); linting ruff clean; N=120 em ~11s (limite 60s); separação estrutural de nota confirmada em TC-08.'
+reviewer: 'Quinn'
+updated: '2026-05-22T00:00:00Z'
+top_issues: []
+waiver: { active: false }

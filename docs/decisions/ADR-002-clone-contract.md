@@ -251,8 +251,10 @@ def corrigir_aluno(client: Anthropic, payload: dict) -> RespostaBatch:
                 )
                 continue
             # Tentativa 2 falhou → propagar erro e marcar batch para revisão manual
-            raise ClonValidationError(raw=raw, errors=e.errors())
+            raise ClonValidationError(raw=raw, errors=e.errors()) from e  # B904
 ```
+
+**Nota sobre B904 (`raise ... from e`):** a implementação real usa `from e` para preservar o `__cause__` da exceção original, em conformidade com a regra B904 (flake8-bugbear / ruff). O pseudocódigo acima foi atualizado para refletir a implementação correta.
 
 **Observação sobre cache (V9):** o campo `system` recebe um array com `cache_control: {"type": "ephemeral"}`. O cache dura 5 minutos a partir da primeira chamada. Num batch sequencial de até ~60 alunos processados dentro de 5 minutos, todas as chamadas reutilizam o cache — redução de custo estimada de 80-85% no componente de system prompt (tokens cached custam ~0.1× o preço de input normal).
 
@@ -559,3 +561,4 @@ Se a segunda tentativa também falhar validação:
 |------|-------|---------|
 | 2026-05-22 | @dev (Dex) | Criação do ADR conforme Story 0.3, modo YOLO. |
 | 2026-05-22 | @dev (Dex) | Revisão Sprint 2: 9 correções de processo (V1-V9) identificadas por Pedro Valério. Path absoluto (V1), retry com contexto (V2), detecção de truncation (V3), guard de arquivo vazio (V4), sanitização de prompt injection + flag possivel_injection (V5), timeout 90s (V6), fallback de encoding (V7), batch size documentado (V8), prompt cache contratado (V9). |
+| 2026-05-22 | @dev (Dex) | Pseudocódigo atualizado: `raise ClonValidationError(...) from e` (B904 compliance). Nota explicativa adicionada. GAP-D identificado por Pedro Valério (auditoria pré-QA Story 2.1). |

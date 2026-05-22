@@ -1,0 +1,8 @@
+schema: 1
+story: '2.3'
+gate: PASS
+status_reason: 'Todos os 11 ACs verificados; 9 testes unitários passam (0 FAILED); linting ruff clean; regras top 10% + cap 9 validadas para N=1, N=10, N=20; payload ao Sonnet sem PII confirmado em TC-CAL-06 e TC-CAL-09.'
+reviewer: 'Quinn'
+updated: '2026-05-22T00:00:00Z'
+top_issues: []
+waiver: { active: false }

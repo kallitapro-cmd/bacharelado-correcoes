@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
 
 class EmptySquadFileError(Exception):
     """Levantada quando um arquivo do squad existe mas está vazio após strip (V4)."""
@@ -12,10 +17,10 @@ class ClonValidationError(Exception):
 
     Atributos:
         raw: resposta bruta da IA que falhou validação.
-        errors: lista de erros Pydantic reportados.
+        errors: lista de erros Pydantic reportados (formato `ErrorDetails`).
     """
 
-    def __init__(self, raw: str, errors: list) -> None:
+    def __init__(self, raw: str, errors: Sequence[Any]) -> None:
         self.raw = raw
         self.errors = errors
         super().__init__(f"Validação falhou após 2 tentativas. raw[:200]={raw[:200]!r}")

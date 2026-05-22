@@ -1,0 +1,61 @@
+schema: 1
+story: '2.2'
+gate: PASS
+status_reason: 'Todos os 16 ACs verificados contra o código real; 10/10 testes PASSED; ruff clean; sem regressões (283 passed / 2 skipped na suíte completa). MNT-003 resolvido com AcaoBatch(str, Enum), patches AC-14 em batch_state.py confirmados, backoff 10s/20s implementado, conversão SimpleNamespace evita import circular.'
+reviewer: 'Quinn'
+updated: '2026-05-22T17:00:00Z'
+top_issues:
+  - id: 'MNT-004'
+    severity: low
+    finding: '_get_max_cost_brl() captura `(ValueError, TypeError, AttributeError, FileNotFoundError, Exception)` — `Exception` torna os tipos anteriores redundantes (já com `# noqa: BLE001`).'
+    suggested_action: 'Simplificar para `except Exception:` ou usar `contextlib.suppress` em iteração futura. Não bloqueia.'
+  - id: 'ARCH-001'
+    severity: low
+    finding: 'Sequência `inicializar_banco() → limpar_banco() → inicializar_banco()` em processar_batch() linha 298-300 contém uma chamada inicial possivelmente redundante (init é idempotente; a chamada após limpar já basta).'
+    suggested_action: 'Avaliar remoção da primeira chamada em refator futuro — comportamento atual é seguro.'
+  - id: 'REL-001'
+    severity: low
+    finding: '_db_write_lock é módulo-scoped — serializa escritas globalmente entre processar_batch() concorrentes. Para sqlite3 com WAL mode é o comportamento correto, mas merece comentário explicando o trade-off.'
+    suggested_action: 'Documentar no docstring de _db_write_lock que a serialização é global por design.'
+waiver: { active: false }
+
+# Detalhamento dos 7 checks de qualidade
+quality_checks:
+  code_review:
+    status: PASS
+    notes: 'Imports limpos; separação clara de responsabilidades; AcaoBatch resolve MNT-003; conversão SimpleNamespace bem isolada em _to_simple_ns; retry com escalada determinística.'
+  unit_tests:
+    status: PASS
+    notes: '10/10 PASSED (TC-01 a TC-10). Cobertura ampla: partição (TC-01), isolamento de falhas (TC-02/TC-03), guardrail de orçamento (TC-04/TC-05), persistência (TC-06), log_action sem PII (TC-07), max_workers (TC-08), enum estável (TC-09), rate-limit retry (TC-10). Fixtures isolam DB e mockam _get_max_cost_brl.'
+  acceptance_criteria:
+    status: PASS
+    notes: 'AC-01 a AC-16 verificados contra código real. Todos atendidos.'
+  no_regressions:
+    status: PASS
+    notes: 'Suíte completa: 283 passed / 2 skipped — nenhuma regressão.'
+  performance:
+    status: PASS
+    notes: 'ThreadPoolExecutor com max_workers configurável; estimativa O(1); particionamento O(N); lock apenas em escritas (não em chamadas API). Estimativa de custo previne explosão financeira (ADR-005).'
+  security:
+    status: PASS
+    notes: 'Sem RA/nome/nota em payloads de log_action (verificado por TC-07 com regex). DB_PATH em /tmp/ documentado como efêmero (ADR-004 LGPD). OrcamentoExcedidoError previne abuso financeiro antes de qualquer chamada à API.'
+  documentation:
+    status: PASS
+    notes: 'Docstrings completas em todos os símbolos públicos; comentários referenciam ADRs (002, 004, 005); File List e Change Log atualizados na story.'
+
+# Evidência de verificação
+evidence:
+  tests_command: 'python3 -m pytest tests/unit/test_batch_processor.py -v'
+  tests_result: '10 passed in 0.73s'
+  full_suite_command: 'python3 -m pytest'
+  full_suite_result: '283 passed, 2 skipped in 2.98s'
+  lint_command: 'ruff check src/batch/'
+  lint_result: 'All checks passed!'
+  files_reviewed:
+    - src/batch/batch_processor.py
+    - src/batch/exceptions.py
+    - src/batch/__init__.py
+    - src/batch/batch_state.py
+    - tests/unit/test_batch_processor.py
+    - packages/wrapper/exceptions.py
+    - src/utils/audit_log.py

@@ -62,10 +62,24 @@ CREATE TABLE IF NOT EXISTS fichas (
 def inicializar_banco() -> None:
     """Cria as 3 tabelas se não existirem — idempotente (AC-02)."""
     with sqlite3.connect(DB_PATH) as conn:  # AC-07 — context manager obrigatório
+        conn.execute("PRAGMA journal_mode=WAL")
         conn.execute(_DDL_BATCHES)
         conn.execute(_DDL_LOTES)
         conn.execute(_DDL_FICHAS)
         conn.commit()
+
+
+def criar_batch(sessao_id: str, total_alunos: int) -> int:
+    """Cria registro de batch e retorna o batch_id gerado."""
+    agora = datetime.now(UTC).isoformat()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute(
+            "INSERT INTO batches (sessao_id, total_alunos, status, criado_em) "
+            "VALUES (?, ?, 'em_andamento', ?)",
+            (sessao_id, total_alunos, agora),
+        )
+        conn.commit()
+        return cursor.lastrowid or 0
 
 
 def salvar_lote(

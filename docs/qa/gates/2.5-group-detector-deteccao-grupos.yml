@@ -1,0 +1,8 @@
+schema: 1
+story: '2.5'
+gate: PASS
+status_reason: 'Todos os 7 ACs verificados; 11 testes unitários passam (TC-01 a TC-08 + EXTRA-A/B/C, 0 FAILED, 0 mocks); linting ruff clean; separação estrutural confirmada (group_detector.py não acessa campo nota); regressão story 2.4 validada (12/12 testes plagiarism_detector passando); integração additive via grupos_conhecidos=None backward-compatible; suite completa 315 passed, 2 skipped, 0 failed.'
+reviewer: 'Quinn'
+updated: '2026-05-22T00:00:00Z'
+top_issues: []
+waiver: { active: false }
