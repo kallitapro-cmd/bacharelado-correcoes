@@ -17,7 +17,7 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE
 
 
 @contextmanager
-def _open_Presentation(path: str):  # noqa: N802
+def _open_Presentation(path: str) -> Any:  # noqa: N802
     """Context manager para Presentation (M1 — python-pptx não tem __exit__ nativo)."""
     prs = Presentation(path)
     try:

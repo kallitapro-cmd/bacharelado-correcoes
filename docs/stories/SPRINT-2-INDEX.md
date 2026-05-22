@@ -14,9 +14,11 @@
 
 | ID | Título | Complexidade | Status | Dependências | Arquivos Principais |
 |----|--------|-------------|--------|--------------|---------------------|
-| [2.0](./2.0.story.md) | Testes unitários de `clone_client.py` — cobertura V3/V4/V5 | S | Draft | Sprint 1 completo | `tests/unit/test_clone_client.py` |
+| [2.0](./2.0.story.md) | Testes unitários de `clone_client.py` — cobertura V3/V4/V5 | S | Ready | Sprint 1 completo | `tests/unit/test_clone_client.py` |
+| [2.1](./2.1.story.md) | Implementar `clone_client.py` — Wrapper Python do squad | M | Draft | 2.0 (Ready) | `packages/wrapper/clone_client.py`, `exceptions.py`, `schemas.py` |
+| [2.2](./2.2.story.md) | Implementar `batch_processor.py` — Orquestrador de lotes | M | Draft | Story 2.1 (clone_client.py) | `src/batch/batch_processor.py`, `src/batch/exceptions.py` |
 
-> **Nota:** Stories 2.1+ serão adicionadas ao longo do Sprint 2 conforme o backlog for expandido.
+> **Nota:** Stories são adicionadas ao índice conforme o backlog é expandido.
 
 ---
 
@@ -54,7 +56,8 @@ DB_PATH = Path("batch_state.db")
 
 | ADR | Stories que implementam |
 |-----|------------------------|
-| ADR-002 — Contrato Clone↔Wrapper (revisado Sprint 2) | 2.0 (testes V3/V4/V5), 2.x (implementação clone_client.py) |
+| ADR-002 — Contrato Clone↔Wrapper (revisado Sprint 2) | 2.0 (testes V3/V4/V5), 2.1 (implementação clone_client.py — V1-V9) |
+| ADR-003 — Política de Temperature | 2.1 (temperature=0.0 na fase de correção) |
 
 ---
 
