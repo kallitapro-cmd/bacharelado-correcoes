@@ -1,0 +1,77 @@
+storyId: "3.3"
+storyTitle: "Exportação para Excel com decisões do PA"
+verdict: PASS
+reviewer: "@qa (Quinn)"
+reviewDate: "2026-05-22"
+branch: main
+
+checks:
+  - id: C1
+    name: Code review
+    verdict: PASS
+    notes: >
+      Separação correta: excel_builder.py (lógica pura, sem Streamlit) e
+      export_screen.py (UI apenas). TYPE_CHECKING imports corretos para
+      FichaCorrecao, GrupoCandidato, ParPlagio. Constantes de limiar nomeadas.
+      `noqa: PLC0415` justificado para import pandas dentro do bloco condicional
+      de preview (evita import desnecessário quando preview está vazio).
+
+  - id: C2
+    name: Unit tests
+    verdict: PASS
+    notes: >
+      17 testes passando em 0.33s. 4 classes cobrindo AC-09 (a-c) + extras:
+      TestConstruirWorkbook (5), TestRevisaoManual (4), TestNomeArquivo (5),
+      TestAbaAlertas (3). Funções puras testadas sem contexto Streamlit.
+      Serialização bytes validada via roundtrip openpyxl.
+
+  - id: C3
+    name: Acceptance criteria
+    verdict: PASS
+    notes: >
+      AC-01: _validar_pre_condicoes() verifica decisoes e batch_results; retorna
+             st.error + page_link se ausentes. ✓
+      AC-02: construir_workbook() produz 2 abas "Notas" e "Alertas". ✓
+      AC-03: Aba Notas com 9 colunas (RA, Nome, Turma, Nota Bruta, Nota Calibrada,
+             Nota Final, Status, Revisão Manual, Observações PA). ✓
+      AC-04: Aba Alertas com RA, Tipo de Alerta, Detalhes, Decisão do PA. ✓
+      AC-05: PatternFill FFFF00 aplicado a cada célula da linha de revisao_manual. ✓
+      AC-06: gerar_nome_arquivo() produz notas_{turma}_{YYYYMMDD}.xlsx;
+             sanitizar_nome_arquivo() remove caracteres inválidos; fallback "turma". ✓
+      AC-07: Zone A (métricas), Zone B (preview 10 linhas), Zone C (download). ✓
+      AC-08: workbook_para_bytes() usa io.BytesIO local — zero chamadas externas. ✓
+      AC-09: 17 testes cobrindo os 3 cenários obrigatórios + extras. ✓
+
+  - id: C4
+    name: No regressions
+    verdict: PASS
+    notes: >
+      418 passed, 2 skipped — suíte completa sem regressões.
+      Os 2 skipped são pré-existentes.
+
+  - id: C5
+    name: Performance
+    verdict: PASS
+    notes: >
+      Geração do workbook é O(n) para n alunos. Auto-ajuste de colunas é O(n*m)
+      onde m = número de colunas (9 fixo). Para 200 alunos < 1s esperado.
+      Preview limitado a 10 linhas — sem impacto de performance na UI.
+
+  - id: C6
+    name: Security
+    verdict: PASS
+    notes: >
+      ADR-004: processamento 100% local confirmado (AC-08). Nenhum dado de aluno
+      sai do sistema. sanitizar_nome_arquivo() previne path traversal no nome do
+      arquivo (regex [a-zA-Z0-9_-] apenas). Valores None/NaN convertidos para
+      str/float antes de escrever (AC-06 risk mitigation).
+
+  - id: C7
+    name: Documentation
+    verdict: PASS
+    notes: >
+      Story 3.3 Change Log atualizado. DoD checkboxes marcados [x].
+      Docstring de módulo descreve dependências e estrutura de consumo.
+      Status: InProgress → InReview.
+
+issues: []
