@@ -1,0 +1,81 @@
+storyId: "3.2"
+storyTitle: "Tabela de validação com grupos e plágio (Progressive Disclosure)"
+verdict: PASS
+reviewer: "@qa (Quinn)"
+reviewDate: "2026-05-22"
+branch: main
+
+checks:
+  - id: C1
+    name: Code review
+    verdict: PASS
+    notes: >
+      Separação clara entre lógica pura (funções testáveis) e rendering Streamlit.
+      TYPE_CHECKING imports corretos com `from __future__ import annotations`.
+      Constantes nomeadas para limiares de plágio. Sem code smells detectados.
+
+  - id: C2
+    name: Unit tests
+    verdict: PASS
+    notes: >
+      23 testes passando em 0.17s. 5 classes cobrindo AC-17 (a-e).
+      Cobertura: construção de linhas, filtros, batch approval, controle de exportação,
+      revisão manual como decisão válida. Nenhum teste usando mocks Streamlit — funções
+      puras corretamente isoladas.
+
+  - id: C3
+    name: Acceptance criteria
+    verdict: PASS
+    notes: >
+      AC-01 a AC-18 revisados linha a linha.
+      AC-04: st.container(border=True) + session_state["revisando"] — NÃO st.expander. ✓
+      AC-05: confirmação inline com [Confirmar] [Cancelar]. ✓
+      AC-05b: badge "✓ Aprovado" + botão "Desfazer" que remove decisoes[ra]. ✓
+      AC-07: st.progress + :red/:orange/:green markdown — sem unsafe_allow_html nos badges. ✓
+      AC-10: pares_suprimidos SOMENTE no Level 2 via st.caption + st.toggle. ✓
+      AC-11: step=0.1 no number_input. ✓
+      AC-12: ZoneInfo("America/Sao_Paulo") no timestamp ISO 8601. ✓
+      AC-14: revisao_manual conta como decisão válida para exportação. ✓
+      AC-18: filtro_ativo e revisando preservados entre reruns. ✓
+
+  - id: C4
+    name: No regressions
+    verdict: PASS
+    notes: >
+      401 passed, 2 skipped — suíte completa sem regressões. Os 2 skipped são
+      pré-existentes (não introduzidos por esta story).
+
+  - id: C5
+    name: Performance
+    verdict: PASS
+    notes: >
+      Tabela renderizada via loop Python (sem st.dataframe). Para turmas de 100 alunos
+      o filtro rápido reduz as linhas visíveis. construir_linha_aluno é O(n * m) onde
+      n=alunos, m=pares de plágio — aceitável para tamanhos típicos (< 200 alunos).
+
+  - id: C6
+    name: Security
+    verdict: PASS
+    notes: >
+      ADR-004 respeitado: sidebar mostra apenas contagens agregadas, sem RAs na posição proeminente.
+      ADR-006 respeitado: plágio/grupos são informativos, nenhuma nota alterada automaticamente.
+      unsafe_allow_html=True usado apenas para estilo cinza dos pares_suprimidos descartados
+      no Level 2 — não há injeção de HTML via dados do usuário (conteúdo são floats formatados).
+
+  - id: C7
+    name: Documentation
+    verdict: PASS
+    notes: >
+      Story 3.2 Change Log atualizado com transições de status.
+      DoD checkboxes marcados. Docstring de módulo descreve arquitetura Progressive Disclosure.
+      Revisão do author design (oalanicolas) — 7/7 PASS documentada no Change Log.
+
+issues: []
+
+designReview:
+  reviewer: "@oalanicolas (Alan Nicolas)"
+  date: "2026-05-22"
+  verdict: "7/7 PASS"
+  observations:
+    - "st.warning no batch approval poderia ser st.info semanticamente (não-bloqueante)"
+    - "unsafe_allow_html=True no Level 2 pares_suprimidos está correto per AC-10"
