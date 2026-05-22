@@ -1,0 +1,90 @@
+schema: 1
+story: '3.1'
+title: 'Barra de progresso do batch (real-time via batch_state)'
+gate: CONCERNS
+reviewer: Quinn
+reviewed_at: '2026-05-22T00:00:00Z'
+
+status_reason: |
+  9/9 ACs verificados integralmente. 42 testes passando (0.37s). Regressão
+  378 passed / 2 skipped / 0 failed. ruff check OK, ruff format OK, mypy OK.
+  ADR-004 e ADR-006 respeitados. 3 observações de baixa severidade (TH-001
+  import lazy, TH-002 assert em produção, TH-003 DoD manual pendente).
+  Gate aprovado: InReview → Done.
+
+evidence:
+  pytest_unit: '42 passed in 0.37s'
+  pytest_regression: '378 passed, 2 skipped, 0 failed in 7.72s'
+  ruff_check: 'All checks passed'
+  ruff_format: '2 files already formatted'
+  mypy: 'Success: no issues found in 1 source file'
+
+ac_coverage:
+  - ac: AC-01
+    verdict: PASS
+    note: 'batch_config_valido() L72-90; render() L325-332 → st.error + botão retorno sem iniciar batch'
+  - ac: AC-02
+    verdict: PASS
+    note: 'threading.Thread(daemon=True, name="batch-processor") L352-361; ref em session_state["_batch_thread"]'
+  - ac: AC-03
+    verdict: PASS
+    note: 'st.progress(razao) L406; SQL COUNT polling contar_lotes_concluidos(); st.rerun + time.sleep(2) L420-421'
+  - ac: AC-04
+    verdict: PASS
+    note: 'formatar_contador_lotes() L109-125; "Processando lote X de Y — Z alunos corrigidos" via st.markdown L407'
+  - ac: AC-05
+    verdict: PASS
+    note: 'listar_motivos_falha() → st.expander + st.warning por lote L410-414; não interrompe progresso dos demais'
+  - ac: AC-06
+    verdict: PASS
+    note: 'Sequência pós-batch: calibrar_batch → detectar_plagio_no_batch → detectar_grupos_candidatos, cada um com st.spinner'
+  - ac: AC-07
+    verdict: PASS
+    note: 'construir_batch_results() L128-146 → 5 chaves fixas; st.switch_page(PAGINA_VALIDACAO) L499'
+  - ac: AC-08
+    verdict: PASS
+    note: 'Bloco L370-380 checa erro_orcamento antes do progresso; exibe estimativa vs limite; sem navegação para validação'
+  - ac: AC-09
+    verdict: PASS
+    note: '42 testes: (a) 10 casos TestBatchConfigValido; (b) TestRunBatchOrcamentoExcedido; (c) 7 casos TestCalcularProgresso'
+
+adr_compliance:
+  - adr: ADR-004
+    status: PASS
+    note: 'Progress screen exibe apenas contadores agregados; nomes_por_ra nunca exibido na UI'
+  - adr: ADR-006
+    status: PASS
+    note: 'Detectores chamados apenas para armazenar resultados; notas não modificadas automaticamente'
+  - adr: ADR-002
+    status: PASS
+    note: 'BATCH_SIZE importado de packages.wrapper.clone_client (fonte única de verdade)'
+
+top_issues:
+  - id: TH-001
+    severity: low
+    category: code
+    description: 'Import lazy de BATCH_SIZE dentro de render() (L397) com noqa:PLC0415 — inconsistente com padrão de imports no topo do módulo'
+    recommendation: 'Mover import de BATCH_SIZE para o topo do módulo em iteração futura'
+
+  - id: TH-002
+    severity: low
+    category: code
+    description: 'assert isinstance(config, dict) L335 — assert é eliminado com python -O; impossível de atingir em prática pois batch_config_valido() já garante o tipo'
+    recommendation: 'Substituir por guard explícito (if not isinstance: return) em iteração futura'
+
+  - id: TH-003
+    severity: low
+    category: docs
+    description: 'DoD item "Progresso visível no Streamlit local com turma de teste" marcado como pendente — requer sessão manual com dados reais'
+    recommendation: 'Validar em sessão de demo pré-entrega do Sprint 3; não bloqueia merge'
+
+waiver:
+  active: false
+
+strengths:
+  - '7 funções puras 100% testáveis sem Streamlit; render() apenas orquestra'
+  - 'SQL COUNT polling (não recuperar_fichas_batch) — performance AC-03 respeitada'
+  - 'Worker _run_batch nunca acessa st.* — thread-safe sem add_script_run_ctx'
+  - '14x acima do mínimo de testes (42 vs 3 exigidos)'
+  - 'Falhas silenciosas nos helpers SQL — UI nunca quebra por banco inacessível'
+  - 'daemon=True garante limpeza de thread com navegação do usuário'

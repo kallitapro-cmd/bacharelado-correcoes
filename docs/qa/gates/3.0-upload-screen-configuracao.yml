@@ -1,0 +1,70 @@
+schema: 1
+story: '3.0'
+gate: CONCERNS
+status_reason: >
+  AC-01 a AC-09 implementados e verificados. 21 testes unitários passando, ruff e mypy
+  limpos, regressão total 336 passed/2 skipped. Arquitetura sólida: separação clara entre
+  funções puras (testáveis) e render() (Streamlit). ADR-004 (LGPD) respeitado: campo `nome`
+  excluído do dict `alunos` em session_state["batch_config"] e preservado apenas em
+  session_state["nomes_por_ra"] para preview/exportação. Aprovado com duas observações
+  de baixa severidade: formato BRL usa ponto decimal (`R$ 5.00`) em vez de vírgula
+  brasileira (`R$ 5,00`) — cosmético, não funcional; e tratamento de exceções amplo
+  (BLE001) em obter_max_cost() e leitura de planilha — mitigado com fallback seguro.
+reviewer: Quinn
+updated: '2026-05-22T00:00:00Z'
+top_issues:
+  - id: 'UI-001'
+    severity: low
+    category: code
+    finding: >
+      Formato monetário usa ponto como separador decimal (`R$ 5.00`) em vez de vírgula
+      brasileira (`R$ 5,00`). AC-04 especifica "formato R$ X,XX" literalmente, sugerindo
+      locale pt-BR. Impacto cosmético, não funcional.
+    suggested_action: >
+      Em iteração futura (Story 3.1+), aplicar formatação locale-aware:
+      `f"R$ {custo:.2f}".replace('.', ',')` ou usar `locale.currency()` com `pt_BR.UTF-8`.
+      Aplicar consistentemente em metric e warning. Aceitável para MVP.
+  - id: 'UI-002'
+    severity: low
+    category: code
+    finding: >
+      Dois blocos `except Exception as exc:  # noqa: BLE001` em obter_max_cost() (linha 94)
+      e leitura de planilha (linha 173) capturam exceções amplas. Em obter_max_cost o
+      fallback é seguro; na leitura de planilha o erro é exibido ao usuário via st.error
+      sem stack trace (LGPD-safe), o que é desejável.
+    suggested_action: >
+      Considerar restringir a (ValueError, KeyError, OSError) na leitura da planilha em
+      iteração futura para evitar mascarar bugs lógicos. Não bloqueante.
+  - id: 'UI-003'
+    severity: low
+    category: tests
+    finding: >
+      `import math` está dentro de `calcular_estimativa()` (linha 84) em vez do topo do
+      módulo. Funciona corretamente, mas viola PEP 8 e dificulta análise estática.
+    suggested_action: >
+      Mover `import math` para o bloco de imports no topo do arquivo. Trivial.
+waiver:
+  active: false
+evidence:
+  tests_run: 21
+  tests_passed: 21
+  tests_failed: 0
+  regression_total: 336
+  regression_passed: 336
+  regression_skipped: 2
+  ruff_status: clean
+  mypy_status: clean
+  ac_verified:
+    - AC-01: PASS — file_uploader com type=["xlsx","xls"] + validação redundante de extensão
+    - AC-02: PASS — preview 5 linhas via st.dataframe(df[colunas].head(5)) + st.error com lista de colunas ausentes
+    - AC-03: PASS — text_area com max_chars=2000; botão disabled quando enunciado vazio via validar_pode_iniciar
+    - AC-04: PASS (com UI-001) — calcular_estimativa() chama estimar_custo_brl(); exibido como R$ X.XX (não X,XX)
+    - AC-05: PASS — obter_max_cost() com fallback 15.0; warning exibido quando custo > max_cost; botão disabled
+    - AC-06: PASS — botão habilitado só quando (df_valido AND enunciado AND custo<=max_cost); grava batch_config e st.switch_page("pages/2_progresso.py")
+    - AC-07: PASS — metadata sempre contém turma/professor/data_prova (vazios quando ausentes; data_prova=None quando não selecionada)
+    - AC-08: PASS (CRÍTICO) — construir_alunos() exclui `nome`; construir_nomes_por_ra() mantém mapa separado em session_state["nomes_por_ra"]
+    - AC-09: PASS — 21 testes em test_upload_screen.py cobrindo todas as funções puras (mínimo era 3)
+  adr_compliance:
+    - ADR-002: PASS — usa BATCH_SIZE de packages.wrapper.clone_client (fonte única)
+    - ADR-004: PASS — `nome` excluído do dict enviado ao squad; mapa nomes_por_ra mantido apenas em RAM para exportação local
+    - ADR-005: PASS — gate de orçamento via MAX_COST_BRL com fallback 15.0
