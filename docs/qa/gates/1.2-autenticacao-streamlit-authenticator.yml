@@ -1,0 +1,38 @@
+schema: 1
+story: "1.2"
+gate: CONCERNS
+status_reason: >
+  Todos os 7 ACs verificados, 16/16 testes passando, mypy strict e ruff limpos.
+  Concerns não-bloqueadores sobre surface de segurança do lockout e falta de teste
+  de comportamento do banner LGPD com st.rerun() mockado.
+reviewer: Quinn
+updated: "2026-05-22T18:00:00Z"
+top_issues:
+  - id: SEC-001
+    severity: low
+    finding: >
+      LOCKOUT_MESSAGE não menciona "15 minutos" explicitamente no texto — apenas
+      em st.info() subseqüente. Se st.info() não renderizar (modo headless/test),
+      o usuário vê bloqueio sem duração informada.
+    suggested_action: >
+      Incluir duração ("bloqueado por 15 minutos") diretamente em LOCKOUT_MESSAGE
+      para garantir que a informação apareça mesmo sem o bloco st.info() separado.
+  - id: TEST-001
+    severity: low
+    finding: >
+      render_lgpd_banner() chama st.rerun() após aceitação — nenhum teste verifica
+      que o rerun é chamado (apenas que lgpd_accepted é True). Em futura refatoração,
+      st.rerun() poderia ser removido silenciosamente sem quebrar testes.
+    suggested_action: >
+      Adicionar assert/mock de st.rerun() em test_lgpd_accepted_sets_state ou
+      teste específico para render_lgpd_banner().
+  - id: MNT-001
+    severity: low
+    finding: >
+      config.yaml não versionado — apenas config.yaml.example. Sem validação de
+      que as chaves obrigatórias (credentials, cookie) existem em load_config().
+    suggested_action: >
+      Adicionar validação estrutural mínima em load_config() para garantir que
+      'credentials' e 'cookie' existem, com mensagem de erro orientada ao operador.
+waiver:
+  active: false

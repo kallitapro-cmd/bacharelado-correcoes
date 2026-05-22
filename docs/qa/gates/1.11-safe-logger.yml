@@ -1,0 +1,30 @@
+schema: 1
+story: "1.11"
+gate: PASS
+status_reason: >
+  Todos os 5 ACs verificados, 18/18 testes passando, mypy strict e ruff limpos.
+  Implementação minimalista e correta com sanitização de args de formatação do logging.
+reviewer: Quinn
+updated: "2026-05-22T18:00:00Z"
+top_issues:
+  - id: MNT-001
+    severity: low
+    finding: >
+      Padrão RA `\b\d{11}\b` pode gerar falsos positivos com números de 11 dígitos
+      não-RA (ex: timestamps Unix em milissegundos como 1716393600000 não tem
+      11 dígitos, mas valores como CPFs ou valores monetários formatados podem).
+      Sem consequência negativa imediata pois o pior caso é redactar demais.
+    suggested_action: >
+      Observação para o Sprint 2: avaliar se o padrão precisa de refinamento
+      quando o contexto de dados reais for conhecido. Não-bloqueador.
+  - id: MNT-002
+    severity: low
+    finding: >
+      SanitizingFilter aplicado apenas ao handler adicionado por get_safe_logger().
+      Se o logger raiz ('') do Python tiver handlers externos (ex: em produção com
+      Streamlit Cloud), mensagens propagadas não serão sanitizadas.
+    suggested_action: >
+      Considerar aplicar SanitizingFilter também no logger raiz, ou desabilitar
+      propagação com logger.propagate = False. Avaliar no Sprint 2 com setup real.
+waiver:
+  active: false

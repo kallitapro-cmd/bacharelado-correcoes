@@ -1,0 +1,41 @@
+schema: 1
+story: '1.10'
+gate: CONCERNS
+status_reason: >
+  Implementação correta e testes completos (21/21 passando). Um concern de
+  manutenibilidade: o bare `except Exception` em read_aba1() oculta erros
+  inesperados silenciosamente — recomendado estreitar para ValidationError.
+reviewer: Quinn
+updated: '2026-05-22T00:00:00Z'
+top_issues:
+  - id: MNT-001
+    severity: medium
+    finding: >
+      `except Exception` em excel_reader.py:64 captura qualquer exceção —
+      incluindo erros de I/O, KeyError de col_ra=None, e bugs de programação.
+      Isso mascara falhas reais e dificulta depuração em produção com 124 alunos.
+    suggested_action: >
+      Estreitar para `except ValidationError` (de pydantic) e deixar outras
+      exceções propagar normalmente. Adicionar teste que verifica que erros
+      de I/O não são silenciados.
+  - id: MNT-002
+    severity: low
+    finding: >
+      Se col_ra for None (planilha sem coluna RA), a linha `row[col_ra]`
+      levantaria TypeError — não há guard explícito antes do loop principal.
+    suggested_action: >
+      Adicionar validação das colunas obrigatórias após header parse:
+      `if col_ra is None: raise ValueError("Coluna RA não encontrada")`.
+      Já existe teste de colunas reordenadas, mas não de coluna ausente.
+  - id: DOC-001
+    severity: low
+    finding: >
+      A Notas Técnicas da story (linhas 103-128) mostra `load_workbook` sem
+      `read_only=True`. A implementação real usa `read_only=True` (correto),
+      mas há divergência entre spec e código — pode confundir futuros
+      mantenedores que leiam apenas a story.
+    suggested_action: >
+      Atualizar Notas Técnicas da story para refletir a implementação real
+      com `read_only=True` (ação do @po ou @sm).
+waiver:
+  active: false

@@ -1,0 +1,29 @@
+schema: 1
+story: "1.9"
+gate: PASS
+status_reason: >
+  Todos os 6 ACs verificados + 7 correções pré-QA aplicadas. 106/106 testes passando,
+  mypy strict e ruff limpos. Contrato ADR-002 fiel com RespostaBatchIA corretamente
+  separada do estado interno.
+reviewer: Quinn
+updated: "2026-05-22T18:00:00Z"
+top_issues:
+  - id: MNT-001
+    severity: low
+    finding: >
+      ArquivoConvertido.ra é `str` sem pattern e sem field_validator de strip —
+      inconsistente com Aluno.ra e FichaCorrecao.ra que têm validação completa.
+      O campo existe mas não garante formato 11 dígitos.
+    suggested_action: >
+      Adicionar pattern=r"^\d{11}$" e field_validator de strip em ArquivoConvertido.ra
+      para consistência total de contrato. Baixa prioridade pois ArquivoConvertido
+      é produzido internamente pelos conversores.
+  - id: DOC-001
+    severity: low
+    finding: >
+      DoD ainda menciona "60/60 testes" — passou a ser 106 testes após as correções
+      pré-QA, mas o checkbox do DoD não foi atualizado com o novo número.
+    suggested_action: >
+      Atualizar DoD: `pytest tests/unit/test_schemas.py` passa (106/106 testes).
+waiver:
+  active: false

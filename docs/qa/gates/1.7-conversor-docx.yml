@@ -1,0 +1,29 @@
+schema: 1
+story: "1.7"
+gate: PASS
+status_reason: >
+  Todos os 6 ACs verificados, 15/15 testes passando, mypy strict e ruff limpos.
+  Implementação limpa com padrão _falha() consistente e tratamento robusto de .doc legado.
+reviewer: Quinn
+updated: "2026-05-22T18:00:00Z"
+top_issues:
+  - id: MNT-001
+    severity: low
+    finding: >
+      convert_docx() retorna dict[str, object] sem tipagem estrita dos valores —
+      consumidores do Sprint 2 precisarão fazer cast manual para acessar 'texto' str,
+      'flags' list etc. sem erro de tipo.
+    suggested_action: >
+      Considerar criar TypedDict ou usar o schema ArquivoConvertido (Story 1.9)
+      como tipo de retorno no Sprint 2, quando o contrato entre conversores e
+      pipeline estiver consolidado.
+  - id: TEST-001
+    severity: low
+    finding: >
+      Teste de DOCX com tabelas verifica apenas que o output não é vazio —
+      não valida que o conteúdo das células está presente no texto extraído.
+    suggested_action: >
+      Adicionar assert específico verificando que texto de célula conhecido
+      da fixture está presente no output.
+waiver:
+  active: false

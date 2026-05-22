@@ -1,0 +1,30 @@
+schema: 1
+story: "1.8"
+gate: PASS
+status_reason: >
+  Todos os 5 ACs verificados, 24/24 testes passando, mypy strict e ruff limpos.
+  Bom padrão de img.close() em finally e pytesseract mockado corretamente nos testes.
+reviewer: Quinn
+updated: "2026-05-22T18:00:00Z"
+top_issues:
+  - id: MNT-001
+    severity: low
+    finding: >
+      Flag "extracao_falhou" retornada em dois cenários distintos: falha geral
+      de OCR (except Exception) e texto vazio após OCR bem-sucedido. Consumidores
+      do Sprint 2 não conseguem distinguir "OCR rodou mas não encontrou texto"
+      de "OCR falhou com exceção".
+    suggested_action: >
+      Considerar flags distintas no Sprint 2: "extracao_falhou" para exceção e
+      "texto_vazio" para OCR executado sem texto extraído. Não-bloqueador para MVP.
+  - id: TEST-001
+    severity: low
+    finding: >
+      Fixture sintética de imagem com texto gerada via Pillow nos testes não
+      valida que o texto extraído pelo OCR mockado corresponde ao texto real
+      da imagem — apenas que o mock foi chamado.
+    suggested_action: >
+      Adicionar pelo menos um teste de integração real com tesseract instalado,
+      marcado com @pytest.mark.skipif, similar ao padrão usado em test_api_client.py.
+waiver:
+  active: false

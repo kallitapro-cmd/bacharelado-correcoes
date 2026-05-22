@@ -1,0 +1,12 @@
+schema: 1
+story: '2.0'
+gate: PASS
+status_reason: >
+  Todos os 5 ACs verificados: 5 testes implementados e passando sem ANTHROPIC_API_KEY,
+  sem instância de Anthropic() nos testes, TC-03 cobre especificamente blocklist-bajulacao.md
+  vazia (H4 INEGOCIÁVEL), e tmp_path isola corretamente os TC-01 a TC-03.
+reviewer: Quinn
+updated: '2026-05-22T00:00:00Z'
+top_issues: []
+waiver:
+  active: false

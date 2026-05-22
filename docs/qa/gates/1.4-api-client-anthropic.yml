@@ -1,0 +1,20 @@
+schema: 1
+story: "1.4"
+gate: PASS
+status_reason: >
+  Todos os 5 ACs verificados, 13 testes passando + 2 skipped com skipif correto,
+  mypy strict e ruff limpos. Tratamento de erros robusto e seguro conforme ADR-004.
+reviewer: Quinn
+updated: "2026-05-22T18:00:00Z"
+top_issues:
+  - id: MNT-001
+    severity: low
+    finding: >
+      MODEL_BATCH e MODEL_REVIEW declarados como `str` sem Literal — tipagem
+      permissiva permite passar qualquer string como model sem erro de tipo.
+    suggested_action: >
+      Considerar `MODEL_BATCH: Final[str]` e `MODEL_REVIEW: Final[str]` para
+      sinalizar imutabilidade, ou Literal["claude-haiku-4-5-20251001", "claude-sonnet-4-6"]
+      se a intenção for restringir apenas a esses modelos.
+waiver:
+  active: false

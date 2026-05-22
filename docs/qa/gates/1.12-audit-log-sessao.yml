@@ -1,0 +1,119 @@
+storyId: "1.12"
+storyTitle: "Implementar audit log de sessão com download"
+verdict: CONCERNS
+gateDate: "2026-05-22"
+agent: "@qa (Quinn)"
+
+summary: >
+  Implementação sólida com 20 testes passando e retenção zero correta.
+  Aprovado com 2 concerns de manutenibilidade de baixa severidade: acao
+  aceita string livre (sem validação de enum) e o módulo não documenta
+  explicitamente a responsabilidade do chamador de garantir ausência de
+  PII — fato já presente em docstring mas sem validação em runtime.
+  Nenhuma issue de segurança, compliance ou funcionalidade bloqueante.
+
+checks:
+  code_review:
+    result: PASS
+    notes: >
+      CSV_FIELDS como Final[tuple] garante ordem estável entre get_csv()
+      e DictWriter. datetime.UTC (UP017 compliant). cast() para narrowing
+      de st.session_state Any — correto para mypy strict. Constantes
+      privadas _IDENTIFICACAO_PA_KEY e _IDENTIFICACAO_PA_DEFAULT evitam
+      magic strings. clear_log() inicializa a chave antes de zerar (via
+      assignment direto), impedindo KeyError em log vazio. Sem imports
+      relativos.
+
+  unit_tests:
+    result: PASS
+    notes: >
+      20 testes cobrindo: 7 ações obrigatórias (parametrizadas), sequência
+      completa, 4 campos obrigatórios, ISO 8601 UTC, PA default/capturado,
+      CSV vazio com cabeçalho, CSV com 7 ações, UTF-8 com acentos,
+      ausência de RA (regex \b\d{11}\b), ausência de termos PII proibidos,
+      cabeçalho sem RA/nome/nota, clear_log (2 entradas → zerado),
+      clear_log idempotente, retenção zero simulada com dois dicts distintos.
+      Fixture fake_session isola st.session_state por teste — design correto.
+
+  acceptance_criteria:
+    result: PASS
+    notes: |
+      AC #1 — 7 ações obrigatórias geram entrada: VERIFICADO (parametrizado).
+      AC #2 — Download via st.download_button na sidebar: VERIFICADO
+        (app.py:63-72 — label, data, file_name com timestamp, mime).
+      AC #3 — Log não contém nomes/RAs/notas: VERIFICADO por testes
+        test_log_completo_sem_ra_padrao_11_digitos e test_csv_de_log_vazio.
+      AC #4 — Log zerado ao encerrar sessão: VERIFICADO pelo teste
+        test_log_nao_persiste_entre_sessoes_simuladas.
+      AC #5 — pytest tests/unit/test_audit_log.py passa: VERIFICADO
+        (20 testes passando, sem regressões nos 260 da suite completa).
+
+  no_regressions:
+    result: PASS
+    notes: >
+      audit_log importado em app.py como módulo absoluto. get_csv() chamado
+      no render da sidebar — ocorre após startup check (1.3) e auth guard
+      (1.2). Ordem de execução preservada. 260 testes passando.
+
+  performance:
+    result: PASS
+    notes: >
+      get_csv() usa io.StringIO em memória — adequado para logs de sessão
+      (máximo ~100 entradas por sessão de uso normal). Sem I/O de disco ou
+      rede.
+
+  security:
+    result: PASS
+    notes: >
+      ADR-004: log nunca contém RA, nome ou nota. Responsabilidade é do
+      chamador (documentada em module docstring e log_action docstring).
+      Testes validam ausência de RA com regex de 11 dígitos. Sem SQL, sem
+      filesystem, sem dados persistidos fora da sessão.
+
+  documentation:
+    result: PASS
+    notes: >
+      Module docstring documenta campos, ADR-004, e responsabilidade do
+      chamador. log_action docstring lista as 7 ações esperadas e repete
+      a restrição de PII. CSV_FIELDS documentado como "mantida estável
+      para auditoria".
+
+issues:
+  - id: MNT-003
+    severity: low
+    category: code
+    description: >
+      log_action() aceita qualquer string em `acao` sem validação.
+      Uma ação digitada errada (ex: "exportacao" vs "exportação") passa
+      silenciosamente e polui o CSV de auditoria com entradas inconsistentes.
+    recommendation: >
+      Em sprint futuro, considerar Literal["login","upload","inicio_batch",
+      "aprovacao_linha","edicao_nota","rejeicao_regeneracao","exportacao"]
+      ou um Enum para o parâmetro `acao`. Não é bloqueante para o MVP —
+      o conjunto de chamadores é pequeno e controlado no Sprint 1.
+    sprint_target: "Sprint 2 (backlog)"
+    blocking: false
+
+  - id: MNT-004
+    severity: low
+    category: docs
+    description: >
+      O módulo documenta "responsabilidade do chamador" para garantir
+      ausência de PII em payload_resumido (ADR-004), mas não há teste
+      que verifique que o código de chamada (ex: app.py) não passa payload
+      com PII. O teste atual valida apenas os payloads exemplo da story.
+    recommendation: >
+      Adicionar, em sprint futuro, um teste de integração ou lint rule
+      que verifique que nenhum site de chamada de log_action() no código
+      da app passa um argumento que contenha padrões de PII. Não bloqueante
+      — os payloads do Sprint 1 são todos literais agregados.
+    sprint_target: "Sprint 2 (backlog)"
+    blocking: false
+
+adrs_verified:
+  - id: ADR-004
+    status: compliant
+    note: >
+      Retenção zero via st.session_state. Log não persiste entre sessões.
+      Campos do CSV auditados: sem RA, nome ou nota. payload_resumido
+      com responsabilidade documentada no chamador.

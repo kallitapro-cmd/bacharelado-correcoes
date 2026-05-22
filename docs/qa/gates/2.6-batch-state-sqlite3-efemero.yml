@@ -1,0 +1,22 @@
+schema: 1
+story: '2.6'
+gate: PASS
+status_reason: >
+  AC-01 a AC-10 verificados: DB_PATH com comentário EFÊMERO exato, 7 testes passando
+  com isolamento tmp_path, schema sem coluna de nome (ADR-004 LGPD), context manager
+  sem leak, excepts tipados. Observação de baixa severidade documentada (tipo de retorno).
+reviewer: Quinn
+updated: '2026-05-22T00:00:00Z'
+top_issues:
+  - id: 'MNT-001'
+    severity: low
+    finding: >
+      recuperar_fichas_batch() retorna list[Any] (dicts Python) em vez de list[FichaCorrecao].
+      Correto para o escopo desta story (evita dependência circular), mas batch_processor.py
+      (Story 2.2) precisará de conversão explícita ao consumir este módulo.
+    suggested_action: >
+      Na Story 2.2, ao implementar batch_processor.py, adicionar conversão explícita:
+      FichaCorrecao(**ficha_dict) ou considerar mover FichaCorrecao para src/models/
+      conforme sugerido no ADR-002 para eliminar a dependência circular.
+waiver:
+  active: false

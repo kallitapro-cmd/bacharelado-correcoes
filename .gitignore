@@ -36,7 +36,7 @@ env/
 Thumbs.db
 
 # QA/logs de sessão
-qa/
+# qa/ — regra removida: docs/qa/gates/ é documentação obrigatória do processo
 *.log
 logs/
 
