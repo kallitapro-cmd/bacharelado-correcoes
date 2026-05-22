@@ -1,0 +1,50 @@
+# Secrets e configurações sensíveis
+config.yaml
+.streamlit/secrets.toml
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# SQLite efêmero
+*.db
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# QA/logs de sessão
+qa/
+*.log
+logs/
+
+# Dependencies (AIOX)
+node_modules/
+node_modules
+
+# AIOX Local
+.aiox-core/local/
+.claude/settings.local.json
+.aiox/install-log.txt

@@ -1,0 +1,38 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking (move type-only imports to TYPE_CHECKING)
+]
+ignore = [
+    "E501",  # line too long — ruff format cuida disso
+    "B008",  # do not perform function calls in default arguments (Pydantic usa isso)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+# pydantic.mypy plugin incompatível com mypy>=2.0 — aguardando fix upstream
+# plugins = ["pydantic.mypy"]
+# Não exigir tipagem em scripts de teste simples
+exclude = ["tests/fixtures/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+addopts = "-q --tb=short"
+timeout = 20

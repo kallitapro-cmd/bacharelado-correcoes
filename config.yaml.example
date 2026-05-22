@@ -1,0 +1,22 @@
+# Exemplo de configuração do streamlit-authenticator.
+#
+# COMO USAR:
+#   1. Copie este arquivo para `config.yaml` (que está no .gitignore).
+#   2. Substitua a senha pelo hash bcrypt gerado por
+#      `streamlit_authenticator.Hasher().hash("senha_real")`.
+#   3. Gere uma chave aleatória forte para `cookie.key`
+#      (ex.: `python -c "import secrets; print(secrets.token_hex(32))"`).
+#
+# NUNCA commite o arquivo `config.yaml` real — ele contém credenciais.
+credentials:
+  usernames:
+    pa_exemplo:
+      email: pa@exemplo.edu.br
+      name: Professor Assistente Exemplo
+      password: hashed_password_aqui  # usar Hasher do streamlit-authenticator
+cookie:
+  expiry_days: 1
+  key: chave_secreta_aleatoria_aqui
+  name: corretor_academico_cookie
+preauthorized:
+  emails: []

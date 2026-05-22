@@ -1,0 +1,32 @@
+{
+  "language": "portuguese",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/pre-commit-security.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/pre-commit-quality.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/pre-commit-tests.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/pre-commit-adr-status.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/pre-commit-converters-guard.py"
+          }
+        ]
+      }
+    ]
+  }
+}

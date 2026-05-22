@@ -1,0 +1,10 @@
+# Ferramentas de qualidade — obrigatórias antes do Sprint 2
+ruff>=0.4.0
+mypy>=1.10.0
+pydantic>=2.11.0          # plugin mypy incompatível com mypy>=2.0 — não usar [mypy] extra
+detect-secrets>=1.5.0
+
+# Testes
+pytest==8.3.5
+pytest-cov==6.1.0
+pytest-timeout>=2.3.0    # timeout por teste (usado no hook pre-commit-tests)
