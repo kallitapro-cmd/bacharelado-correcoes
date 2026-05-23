@@ -282,7 +282,7 @@ def render_login(
         help="Seu nome aparecerá nos relatórios de correção.",  # M1
     )
 
-    name, authentication_status, username = authenticator.login(
+    login_tuple = authenticator.login(
         location="main",
         fields={
             "Form name": "Login",
@@ -291,6 +291,9 @@ def render_login(
             "Login": "Entrar",
         },
     )
+    if login_tuple is None:
+        return None, None, None
+    name, authentication_status, username = login_tuple
 
     if authentication_status is True:
         reset_attempts()
