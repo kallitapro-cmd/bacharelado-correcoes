@@ -145,8 +145,8 @@ def build_authenticator(
     return stauth.Authenticate(
         credentials=cfg.get("credentials", {}),
         cookie_name=cookie_cfg.get("name", "corretor_academico_cookie"),
-        cookie_key=cookie_cfg.get("key", ""),
-        cookie_expiry_days=1,
+        cookie_key=cookie_cfg.get("key", "chave_default_123"),
+        cookie_expiry_days=cookie_cfg.get("expiry_days", 1),
     )
 
 
