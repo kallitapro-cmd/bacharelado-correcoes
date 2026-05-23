@@ -146,7 +146,7 @@ def build_authenticator(
         credentials=cfg.get("credentials", {}),
         cookie_name=cookie_cfg.get("name", "corretor_academico_cookie"),
         cookie_key=cookie_cfg.get("key", "chave_default_123"),
-        cookie_expiry_days=cookie_cfg.get("expiry_days", 1),
+        cookie_expiry_days=1,  # AC #5 — sempre 1 dia, independente do config
     )
 
 
@@ -241,16 +241,15 @@ def reset_attempts() -> None:
 def render_login(
     authenticator: stauth.Authenticate,
 ) -> tuple[str | None, bool | None, str | None]:
-    """Renderiza o fluxo de login completo (banner + identificação + form).
+    """Renderiza o fluxo de login completo (banner + formulário de credenciais).
 
     Etapas:
 
     1. Mostra o banner LGPD; bloqueia até o usuário aceitar.
     2. Se o usuário estiver em lockout, exibe mensagem e interrompe.
-    3. Coleta o campo "Seu nome (identificação)" para audit trail.
-    4. Delega para ``Authenticate.login()`` o formulário de credenciais.
-    5. Atualiza contador de tentativas e popula
-       ``st.session_state['identificacao_pa']`` em caso de sucesso.
+    3. Delega para ``Authenticate.login()`` o formulário de credenciais.
+    4. Atualiza contador de tentativas e popula
+       ``st.session_state['identificacao_pa']`` com o ``name`` retornado.
 
     Returns:
         Tripla ``(name, authentication_status, username)`` no mesmo formato
@@ -274,14 +273,6 @@ def render_login(
         st.info(f"Você pode tentar novamente em {mins} min {secs} seg.")
         return None, False, None
 
-    # H1 — Subtítulo orientando o PA antes do campo de identificação.
-    st.caption("Antes de entrar, informe seu nome para registro")
-    identificacao = st.text_input(
-        "Seu nome (identificação)",
-        key="input_identificacao_pa",
-        help="Seu nome aparecerá nos relatórios de correção.",  # M1
-    )
-
     login_tuple = authenticator.login(
         location="main",
         fields={
@@ -300,7 +291,8 @@ def render_login(
 
     if authentication_status is True:
         reset_attempts()
-        st.session_state[_KEY_IDENTIFICACAO_PA] = identificacao.strip() if identificacao else ""
+        # Usa o name retornado pelo authenticator como identificação para audit trail.
+        st.session_state[_KEY_IDENTIFICACAO_PA] = name.strip() if name else ""
         st.session_state[_KEY_HAD_SESSION] = True
     elif authentication_status is False:
         triggered = register_failed_attempt()
