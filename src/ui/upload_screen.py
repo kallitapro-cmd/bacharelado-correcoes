@@ -132,6 +132,12 @@ def render() -> None:
     # -----------------------------------------------------------------------
     st.subheader("1. Planilha de alunos")
 
+    st.caption(
+        "A planilha deve conter as colunas: **RA**, **Nome**, e o texto de cada "
+        "resposta dos alunos (ex: coluna **Atividade 1**). "
+        "Colunas obrigatórias: `ra`, `nome`, `resposta`. Coluna opcional: `turma`."
+    )
+
     arquivo = st.file_uploader(
         "Selecione a planilha da turma",
         type=["xlsx", "xls"],
@@ -179,12 +185,13 @@ def render() -> None:
     st.markdown("---")
     st.subheader("2. Enunciado do trabalho")
 
-    enunciado = st.text_area(
-        "Enunciado do trabalho",
-        max_chars=2000,
-        placeholder="Cole aqui o enunciado completo do trabalho avaliado...",
-        help="Máximo 2000 caracteres. O enunciado orienta os critérios de correção.",
+    arquivo_enunciado = st.file_uploader(
+        "Envie o documento com o enunciado",
+        type=["pdf", "pptx", "docx"],
+        help="Formatos aceitos: PDF, PPTX ou DOCX. O enunciado orienta os critérios de correção.",
     )
+    # enunciado como string não-vazia sinaliza presença do arquivo para validar_pode_iniciar
+    enunciado = arquivo_enunciado.name if arquivo_enunciado is not None else ""
 
     st.markdown("---")
     st.subheader("3. Metadados (opcionais)")
@@ -196,7 +203,7 @@ def render() -> None:
         professor = st.text_input("Professor(a)", placeholder="Ex: Prof. Silva")
     with col3:
         data_prova = st.date_input(
-            "Data da prova",
+            "Data da atividade avaliativa",
             value=None,
             format="DD/MM/YYYY",
         )
@@ -249,7 +256,8 @@ def render() -> None:
 
         st.session_state["batch_config"] = {
             "alunos": alunos,
-            "enunciado": enunciado.strip(),
+            "enunciado_nome": arquivo_enunciado.name,
+            "enunciado_bytes": arquivo_enunciado.read(),
             "metadata": metadata,
         }
         st.session_state["nomes_por_ra"] = nomes_por_ra
