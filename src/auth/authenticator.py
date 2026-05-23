@@ -332,6 +332,14 @@ def require_authentication(
     """
 
     authenticator = build_authenticator(config_path=config_path)
+
+    # stauth v0.4.x persiste o status em session_state["authentication_status"]
+    # via cookie ou após submit bem-sucedido. Nos reruns subsequentes ao login,
+    # authenticator.login() retorna None (form não submetido novamente), mas o
+    # session_state já confirma a sessão ativa — checar aqui evita tela em branco.
+    if st.session_state.get("authentication_status") is True:
+        return authenticator
+
     _, authentication_status, _ = render_login(authenticator)
 
     if authentication_status is True:

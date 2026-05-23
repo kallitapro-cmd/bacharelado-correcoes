@@ -11,6 +11,7 @@ from datetime import datetime
 import streamlit as st
 
 from src.auth.authenticator import require_authentication
+from src.ui import upload_screen
 from src.utils import audit_log
 
 st.set_page_config(
@@ -71,8 +72,4 @@ with st.sidebar:
         ),
     )
 
-st.title("Corretor Acadêmico")
-st.info(
-    "Corretor Acadêmico — em construção. As demais funcionalidades serão "
-    "introduzidas nas stories seguintes do Sprint 1."
-)
+upload_screen.render()
