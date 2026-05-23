@@ -58,12 +58,13 @@ DEFAULT_CONFIG_PATH: Final[Path] = Path(__file__).resolve().parents[2] / "config
 
 def _load_config_from_secrets() -> dict[str, Any]:
     """Carrega configuração a partir de ``st.secrets`` (Streamlit Cloud)."""
-    import json
-    auth_secrets = st.secrets["auth"]
-    return json.loads(json.dumps({
-        "credentials": {k: dict(v) for k, v in auth_secrets["credentials"].items()},
-        "cookie": dict(auth_secrets["cookie"]),
-    }))
+    def _to_dict(obj: Any) -> Any:
+        if hasattr(obj, "to_dict"):
+            return _to_dict(obj.to_dict())
+        if hasattr(obj, "items"):
+            return {k: _to_dict(v) for k, v in obj.items()}
+        return obj
+    return _to_dict(st.secrets["auth"])
 
 
 # --- Chaves de session_state (centralizadas para facilitar manutenção) ------
