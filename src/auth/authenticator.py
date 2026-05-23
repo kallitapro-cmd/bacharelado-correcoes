@@ -291,9 +291,12 @@ def render_login(
             "Login": "Entrar",
         },
     )
-    if login_tuple is None:
-        return None, None, None
-    name, authentication_status, username = login_tuple
+    # login_tuple é None enquanto o usuário não submete — isso é normal
+    name = None
+    authentication_status = None
+    username = None
+    if login_tuple is not None:
+        name, authentication_status, username = login_tuple
 
     if authentication_status is True:
         reset_attempts()
